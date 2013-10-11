@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = EuroDNS::VERSION
   spec.authors       = ["Fernando Morgenstern"]
   spec.email         = ["contato@fernandomarcelo.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = "A Ruby wrapper for EuroDNS API."
+  spec.summary       = "A Ruby wrapper for EuroDNS API."
+  spec.homepage      = "https://github.com/fernandomm/eurodns"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
