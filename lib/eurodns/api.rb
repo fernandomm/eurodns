@@ -45,20 +45,26 @@ module EuroDNS
     end
 
     def request_from_api xml
-      result = self.class.post @api_url, :xml => xml
+      self.class.post(@api_url, {
+        :body => {:xml => xml},
+        :basic_auth => {
+          :username => @username,
+          :password => "MD5#{Digest::MD5.hexdigest(@password)}"  
+        }
+      })
     end
 
     def process_response response
       xml = Nokogiri::XML.parse(response)
 
-      result = xml.root.xpath('/response/result').first
+      result = xml.root.xpath('//xmlns:response/xmlns:result', {'xmlns' => 'http://www.eurodns.com/'}).first
       result_code = result[:code].to_i
 
       if !result_code_means_success(result_code)
-        raise InvalidApiResponse, "#{result_code} - #{result.xpath('//msg').first.text}"
+        raise InvalidApiResponse, "#{result_code} - #{result.xpath('//xmlns:msg', {'xmlns' => 'http://www.eurodns.com/'}).first.text}"
       end
 
-      xml.xpath('//resData')
+      xml.xpath('//xmlns:resData', {'xmlns' => 'http://www.eurodns.com/'})
     end
 
     protected
