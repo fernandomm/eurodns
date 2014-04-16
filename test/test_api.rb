@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ApiTest < Test::Unit::TestCase
+class TestApi < Test::Unit::TestCase
   def setup
     @eurodns = EuroDNS::API.new('username', 'password')
   end
@@ -17,6 +17,22 @@ class ApiTest < Test::Unit::TestCase
     xml = Nokogiri::XML.parse(request)
     
     assert_equal xml.root.xpath('//ip:add/ip:address').length, 1
+  end
+
+  def test_xml_generation_with_additional_data
+    request = @eurodns.generate_request_xml 'domain:create', {:name => 'example.org'}, [{
+      'nameserver:create' => {
+        fqdn: 'ns1.example.org',  
+      }
+    },{
+      'nameserver:create' => {
+        fqdn: 'ns2.example.org',  
+      }
+    }]
+
+    xml = Nokogiri::XML.parse(request)
+    
+    assert_equal xml.xpath('//xmlns:fqdn', {'xmlns' => 'http://www.eurodns.com/nameserver'}).length, 2
   end
 
   def test_process_of_valid_response

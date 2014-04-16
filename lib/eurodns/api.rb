@@ -26,10 +26,11 @@ module EuroDNS
       process_response(api_response)
     end
 
-    def generate_request_xml method, data
+    def generate_request_xml method, data, additional_data = []
+      other_namespaces = []
       namespace = method.split(':').first
 
-      document = Nokogiri::XML::Builder.new do |xml|
+      builder = Nokogiri::XML::Builder.new do |xml|
         xml.request("xmlns:#{namespace}" => "http://www.eurodns.com/#{namespace}") {
           xml.send(method) {
             unless data.nil?
@@ -38,9 +39,34 @@ module EuroDNS
               end
             end
           }
+
+          unless additional_data.nil?
+            additional_data.each do |value|
+              method_with_namespace = value.first[0]
+              data = value.first[1]
+
+              (namespace, method) = method_with_namespace.split(':')
+              
+              other_namespaces.push(namespace).uniq!
+              
+              xml.send(method_with_namespace) {
+                unless data.nil?
+                  data.each do |variable, value|
+                    xml.send("#{namespace}:#{variable}", value)
+                  end
+                end
+              }            
+            end
+          end
         }
       end
 
+      document = Nokogiri::XML(builder.to_xml)
+
+      other_namespaces.each do |namespace|
+        document.root.add_namespace(namespace, "http://www.eurodns.com/#{namespace}")
+      end
+      
       document.to_xml
     end
 
@@ -56,15 +82,16 @@ module EuroDNS
 
     def process_response response
       xml = Nokogiri::XML.parse(response)
+      xml.remove_namespaces!
 
-      result = xml.root.xpath('//xmlns:response/xmlns:result', {'xmlns' => 'http://www.eurodns.com/'}).first
+      result = xml.root.xpath('//response/result').first
       result_code = result[:code].to_i
 
       if !result_code_means_success(result_code)
-        raise InvalidApiResponse, "#{result_code} - #{result.xpath('//xmlns:msg', {'xmlns' => 'http://www.eurodns.com/'}).first.text}"
+        raise InvalidApiResponse, "#{result_code} - #{result.xpath('//msg').first.text}"
       end
 
-      xml.xpath('//xmlns:resData', {'xmlns' => 'http://www.eurodns.com/'})
+      xml.xpath('//resData')
     end
 
     protected
