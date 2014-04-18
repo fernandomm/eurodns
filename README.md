@@ -1,5 +1,8 @@
 # EuroDNS
 
+[![Build Status](https://api.travis-ci.org/fernandomm/eurodns.png?branch=master)][travis]
+[travis]: http://travis-ci.org/fernandomm/eurodns
+
 TODO: Write a gem description
 
 ## Installation
