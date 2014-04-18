@@ -6,14 +6,14 @@ class TestApi < Test::Unit::TestCase
   end
 
   def test_xml_generation_without_paramaters
-    request = @eurodns.generate_request_xml 'list:tdl', nil
+    request = @eurodns.generate_request_xml 'list:tdl', nil, nil
     xml = Nokogiri::XML.parse(request)
 
     assert_equal xml.root.xpath('//list:tdl').length, 1
   end
 
   def test_xml_generation_with_parameters
-    request = @eurodns.generate_request_xml 'ip:add', {:address => '192.168.0.1'}
+    request = @eurodns.generate_request_xml 'ip:add', {:address => '192.168.0.1'}, nil
     xml = Nokogiri::XML.parse(request)
     
     assert_equal xml.root.xpath('//ip:add/ip:address').length, 1

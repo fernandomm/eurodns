@@ -18,15 +18,15 @@ module EuroDNS
       @password = password
     end
 
-    def call method, data = nil
-      xml = generate_request_xml(method, data)
+    def call method, data = nil, additional_data = []
+      xml = generate_request_xml(method, data, additional_data)
 
       api_response = request_from_api(xml)
 
       process_response(api_response)
     end
 
-    def generate_request_xml method, data, additional_data = []
+    def generate_request_xml method, data, additional_data
       other_namespaces = []
       namespace = method.split(':').first
 
